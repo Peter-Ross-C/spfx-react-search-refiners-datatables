@@ -76,41 +76,41 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                 let renderShimmerElements: JSX.Element[] = [];
                 while (i < 4) {
                     renderShimmerElements.push(
-                        <Shimmer 
-                        key={i}
-                        customElementsGroup={this._getShimmerElements()} 
-                        width="100%"
-                        style={{ marginBottom: "20px" }}                    
-                    />);
+                        <Shimmer
+                            key={i}
+                            customElementsGroup={this._getShimmerElements()}
+                            width="100%"
+                            style={{ marginBottom: "20px" }}
+                        />);
                     i++;
                 }
 
-                renderWpContent = <div>{ renderShimmerElements }</div>;
+                renderWpContent = <div>{renderShimmerElements}</div>;
             }
         }
 
-        
+
         if (this.props.webPartTitle && this.props.webPartTitle.length > 0) {
             renderWebPartTitle = <WebPartTitle title={this.props.webPartTitle} updateProperty={null} displayMode={DisplayMode.Read} />;
         }
 
-        const sortPanel = <SortPanel 
-                                onUpdateSort={this._onUpdateSort} 
-                                sortableFieldsConfiguration={this.props.sortableFields} 
-                                sortDirection={this.state.sortDirection}
-                                sortField={this.state.sortField} />; 
+        const sortPanel = <SortPanel
+            onUpdateSort={this._onUpdateSort}
+            sortableFieldsConfiguration={this.props.sortableFields}
+            sortDirection={this.state.sortDirection}
+            sortField={this.state.sortField} />;
         if (hasError) {
             renderWpContent = <MessageBar messageBarType={MessageBarType.error}>{errorMessage}</MessageBar>;
         } else {
 
             const currentQuery = this.props.queryKeywords + this.props.searchService.queryTemplate + this.props.selectedProperties.join(',');
-            const renderFilterPanel = this.state.availableFilters && this.state.availableFilters.length > 0 ? 
-                                    <FilterPanel 
-                                        availableFilters={this.state.availableFilters} 
-                                        onUpdateFilters={this._onUpdateFilters} 
-                                        refinersConfiguration={this.props.refiners} 
-                                        resetSelectedFilters={ this.state.lastQuery !== currentQuery ? true : false}
-                                    /> : <span />;                                   
+            const renderFilterPanel = this.state.availableFilters && this.state.availableFilters.length > 0 ?
+                <FilterPanel
+                    availableFilters={this.state.availableFilters}
+                    onUpdateFilters={this._onUpdateFilters}
+                    refinersConfiguration={this.props.refiners}
+                    resetSelectedFilters={this.state.lastQuery !== currentQuery ? true : false}
+                /> : <span />;
 
             if (items.RelevantResults.length === 0) {
 
@@ -130,8 +130,8 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
             } else {
 
                 let searchResultTemplate = <div></div>;
-                 if(!this.props.useCodeRenderer) {
-                    searchResultTemplate =  (
+                if (!this.props.useCodeRenderer) {
+                    searchResultTemplate = (
                         <SearchResultsTemplate
                             templateService={this.props.templateService}
                             templateContent={this.props.templateContent}
@@ -169,9 +169,10 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                     </div>;
             }
         }
+        console.log('React stuff doing its thing');
         return (
             <div className={styles.searchWp}>
-                <div tabIndex={-1} ref={ (ref) => { this._searchWpRef = ref; }}></div>
+                <div tabIndex={-1} ref={(ref) => { this._searchWpRef = ref; }}></div>
                 {renderWpContent}
             </div>
         );
@@ -189,7 +190,7 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
 
                 this.props.searchService.selectedProperties = this.props.selectedProperties;
 
-                const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName ;}).join(',');
+                const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName; }).join(',');
 
                 const searchResults = await this.props.searchService.search(this.props.queryKeywords, refinerManagedProperties, this.state.selectedFilters, this.state.currentPage);
                 const localizedFilters = await this._getLocalizedFilters(searchResults.RefinementResults);
@@ -228,6 +229,11 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                 areResultsLoading: false
             });
         }
+
+        console.info(`Finished render...`);
+        setTimeout(() => {
+            this.runDatatables();
+        }, 500);
     }
 
     public async componentWillReceiveProps(nextProps: ISearchContainerProps) {
@@ -257,7 +263,7 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
 
                     this.props.searchService.selectedProperties = nextProps.selectedProperties;
 
-                    const refinerManagedProperties = nextProps.refiners.map(e => { return e.refinerName ;}).join(',');
+                    const refinerManagedProperties = nextProps.refiners.map(e => { return e.refinerName; }).join(',');
 
                     // Reset sortlist
                     this.props.searchService.sortList = nextProps.sortList;
@@ -336,12 +342,12 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
             areResultsLoading: true,
         });
 
-        const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName ;}).join(',');
+        const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName; }).join(',');
 
         const searchResults = await
-        this.props.searchService.search(this.props.queryKeywords, refinerManagedProperties, newFilters, 1);
+            this.props.searchService.search(this.props.queryKeywords, refinerManagedProperties, newFilters, 1);
         const localizedFilters = await
-        this._getLocalizedFilters(searchResults.RefinementResults);
+            this._getLocalizedFilters(searchResults.RefinementResults);
 
         this.setState({
             resultCount: searchResults.TotalRows,
@@ -350,6 +356,9 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
             areResultsLoading: false,
         });
         this.handleResultUpdateBroadCast(searchResults);
+        setTimeout(() => {
+            this.runDatatables();
+        }, 500);
     }
 
     /**
@@ -365,16 +374,15 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                 sortDirection: sortDirection,
                 currentPage: 1,
                 areResultsLoading: true,
-                hasError:false,
-                errorMessage:null
+                hasError: false,
+                errorMessage: null
             });
 
-            const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName ;}).join(',');
-                       
-            this.props.searchService.sortList = [{Property: sortField, Direction: sortDirection}];
+            const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName; }).join(',');
 
-            try
-            {
+            this.props.searchService.sortList = [{ Property: sortField, Direction: sortDirection }];
+
+            try {
                 const searchResults = await this.props.searchService.search(this.props.queryKeywords, refinerManagedProperties, this.state.selectedFilters, 1);
 
                 this.setState({
@@ -383,7 +391,7 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                 });
                 this.handleResultUpdateBroadCast(searchResults);
             }
-            catch(error) {
+            catch (error) {
                 Logger.write('[SearchContainer._onUpdateSort()]: Error: ' + error, LogLevel.Error);
                 const errorMessage = /\"value\":\"[^:]+: SortList\.\"/.test(error.message) ? strings.Sort.SortErrorMessage : error.message;
 
@@ -411,7 +419,7 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
 
         this._searchWpRef.focus();
 
-        const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName ;}).join(',');
+        const refinerManagedProperties = this.props.refiners.map(e => { return e.refinerName; }).join(',');
 
         const searchResults = await this.props.searchService.search(this.props.queryKeywords, refinerManagedProperties, this.state.selectedFilters, pageNumber);
 
@@ -484,7 +492,7 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
                     const localizedLabel = termFromTaxonomy["Labels"]._Child_Items_.filter((label: any) => {
                         return label.Language === lcid;
                     });
-                    
+
                     localizedTerms.push({
                         uniqueIdentifier: termToLocalize.uniqueIdentifier,
                         termId: termToLocalize.termId,
@@ -543,22 +551,22 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
 
     private _getShimmerElements(): JSX.Element {
         return <div style={{ display: 'flex' }}>
-                  <ShimmerElementsGroup
-                    shimmerElements={[
-                        { type: ElemType.line, width: 40, height: 40 },
-                        { type: ElemType.gap, width: 10, height: 40 }
-                    ]}
-                    />
-                    <ShimmerElementsGroup
-                    flexWrap={true}
-                    width="100%"
-                    shimmerElements={[
-                        { type: ElemType.line, width: '100%', height: 10 },
-                        { type: ElemType.line, width: '75%', height: 10 },
-                        { type: ElemType.gap, width: '25%', height: 20 }
-                    ]}
-                    />
-                </div>;
+            <ShimmerElementsGroup
+                shimmerElements={[
+                    { type: ElemType.line, width: 40, height: 40 },
+                    { type: ElemType.gap, width: 10, height: 40 }
+                ]}
+            />
+            <ShimmerElementsGroup
+                flexWrap={true}
+                width="100%"
+                shimmerElements={[
+                    { type: ElemType.line, width: '100%', height: 10 },
+                    { type: ElemType.line, width: '75%', height: 10 },
+                    { type: ElemType.gap, width: '25%', height: 20 }
+                ]}
+            />
+        </div>;
     }
 
     private handleResultUpdateBroadCast(results) {
@@ -579,5 +587,11 @@ export default class SearchResultsContainer extends React.Component<ISearchConta
             return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
         });
         return guid;
+    }
+
+    private runDatatables() {
+        console.info(`Rendering datatables...`);
+        console.info($('#table_id').length);
+        $('#table_id').DataTable();
     }
 }

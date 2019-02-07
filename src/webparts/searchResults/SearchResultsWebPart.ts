@@ -81,6 +81,8 @@ export default class SearchResultsWebPart extends BaseClientSideWebPart<ISearchR
         await this._getTemplateContent();
 
         this.renderCompleted();
+
+
     }
 
     protected get disableReactivePropertyChanges(): boolean {
@@ -774,7 +776,7 @@ export default class SearchResultsWebPart extends BaseClientSideWebPart<ISearchR
                 this.properties.useDefaultSearchQuery = false;
                 this.properties.defaultSearchQuery = '';
                 this.properties.queryKeywords.setValue('');
-                this.render();
+                this.render()
             }
         } as IPropertyPaneConditionalGroup;
     }
@@ -1037,11 +1039,6 @@ export default class SearchResultsWebPart extends BaseClientSideWebPart<ISearchR
         const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
         return guidRegex.test(this.properties.selectedLayout as any);
     }
+
 }
 
-require('./script');
-
-// let tableId = this.context.Documents.getelel
-
-// console.log('Loading datatables...');
-// $('#table_id').DataTable();
